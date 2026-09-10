@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeTrack - Child & Pet Tracking</title>
+
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="login-page">
+
+    <div class="login-box">
+        <div class="logo">🛡️</div>
+
+        <h1>SafeTrack</h1>
+        <p>IoT-Based Child & Pet Tracking System</p>
+
+        <input type="text" id="username" placeholder="Enter Username">
+        <input type="password" id="password" placeholder="Enter Password">
+
+        <button onclick="login()">Login</button>
+
+        <p class="demo">
+            Demo: username: <b>admin</b> | password: <b>1234</b>
+        </p>
+    </div>
+
+</div>
+
+
+<!-- MAIN APPLICATION -->
+<div id="app" class="app hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="brand">
+            🛡️ <span>SafeTrack</span>
+        </div>
+
+        <nav>
+            <button onclick="showPage('dashboard')">🏠 Dashboard</button>
+            <button onclick="showPage('tracking')">📍 Live Tracking</button>
+            <button onclick="showPage('alerts')">🔔 Alerts</button>
+            <button onclick="showPage('history')">📊 History</button>
+        </nav>
+
+        <button class="logout" onclick="logout()">🚪 Logout</button>
+
+    </aside>
+
+
+    <!-- CONTENT -->
+    <main class="content">
+
+        <!-- HEADER -->
+        <header>
+
+            <div>
+                <h2 id="pageTitle">Dashboard</h2>
+                <p>Monitor your loved ones in real time</p>
+            </div>
+
+            <div class="profile">
+                👤 Parent
+            </div>
+
+        </header>
+
+
+        <!-- DASHBOARD -->
+        <section id="dashboard" class="page">
+
+            <div class="cards">
+
+                <div class="card person-card">
+                    <div class="person-icon">👦</div>
+
+                    <div>
+                        <h3>Rahul</h3>
+                        <p>Child</p>
+
+                        <span class="status safe">● Safe</span>
+
+                        <div class="battery">
+                            🔋 Battery: <b>78%</b>
+                        </div>
+                    </div>
+
+                    <button onclick="selectPerson('Rahul')">
+                        Track
+                    </button>
+                </div>
+
+
+                <div class="card person-card">
+                    <div class="person-icon">🐕</div>
+
+                    <div>
+                        <h3>Bruno</h3>
+                        <p>Pet</p>
+
+                        <span class="status safe">● Safe</span>
+
+                        <div class="battery">
+                            🔋 Battery: <b>65%</b>
+                        </div>
+                    </div>
+
+                    <button onclick="selectPerson('Bruno')">
+                        Track
+                    </button>
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-grid">
+
+                <div class="card">
+                    <h3>📍 Current Location</h3>
+
+                    <div id="smallMap"></div>
+
+                    <div class="location-info">
+                        <p>📌 Location: Bengaluru</p>
+                        <p>🌐 Latitude: 13.0827</p>
+                        <p>🌐 Longitude: 80.2707</p>
+                        <p>🕐 Updated: Just now</p>
+                    </div>
+                </div>
+
+
+                <div class="card">
+                    <h3>🔔 Recent Alerts</h3>
+
+                    <div class="alert safe-alert">
+                        🟢 Rahul entered safe zone
+                        <small>10:30 AM</small>
+                    </div>
+
+                    <div class="alert warning-alert">
+                        🟡 Bruno battery below 70%
+                        <small>10:15 AM</small>
+                    </div>
+
+                    <div class="alert safe-alert">
+                        🟢 Device connected
+                        <small>09:50 AM</small>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="card statistics">
+
+                <h3>📊 Tracking Statistics</h3>
+
+                <div class="stats">
+
+                    <div>
+                        <strong>2</strong>
+                        <span>Devices</span>
+                    </div>
+
+                    <div>
+                        <strong>2</strong>
+                        <span>Online</span>
+                    </div>
+
+                    <div>
+                        <strong>0</strong>
+                        <span>Danger Alerts</span>
+                    </div>
+
+                    <div>
+                        <strong>8.4 km</strong>
+                        <span>Today's Distance</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- TRACKING PAGE -->
+        <section id="tracking" class="page hidden">
+
+            <div class="tracking-header">
+
+                <div>
+                    <h3>📍 Live Tracking</h3>
+                    <p>Selected Device: <b id="selectedPerson">Rahul</b></p>
+                </div>
+
+                <select onchange="changePerson(this.value)">
+                    <option>Rahul</option>
+                    <option>Bruno</option>
+                </select>
+
+            </div>
+
+
+            <div class="tracking-layout">
+
+                <div class="card map-card">
+                    <div id="map"></div>
+                </div>
+
+
+                <div class="card tracking-info">
+
+                    <h3>Device Information</h3>
+
+                    <div class="info-row">
+                        <span>👤 Name</span>
+                        <b id="infoName">Rahul</b>
+                    </div>
+
+                    <div class="info-row">
+                        <span>📡 Device</span>
+                        <b>ESP32-GPS-01</b>
+                    </div>
+
+                    <div class="info-row">
+                        <span>🟢 Status</span>
+                        <b class="green">Online</b>
+                    </div>
+
+                    <div class="info-row">
+                        <span>🔋 Battery</span>
+                        <b id="infoBattery">78%</b>
+                    </div>
+
+                    <div class="info-row">
+                        <span>📍 Latitude</span>
+                        <b>13.0827</b>
+                    </div>
+
+                    <div class="info-row">
+                        <span>📍 Longitude</span>
+                        <b>80.2707</b>
+                    </div>
+
+                    <div class="info-row">
+                        <span>🚶 Speed</span>
+                        <b>4.2 km/h</b>
+                    </div>
+
+                    <div class="info-row">
+                        <span>🕐 Last Update</span>
+                        <b>10:32 AM</b>
+                    </div>
+
+
+                    <button class="sos" onclick="sendSOS()">
+                        🚨 EMERGENCY SOS
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ALERTS -->
+        <section id="alerts" class="page hidden">
+
+            <div class="card">
+
+                <h3>🔔 Alerts & Notifications</h3>
+
+                <div class="large-alert safe-alert">
+                    <span>🟢</span>
+
+                    <div>
+                        <b>Safe Zone Active</b>
+                        <p>Rahul is currently inside the safe zone.</p>
+                        <small>10:30 AM</small>
+                    </div>
+                </div>
+
+
+                <div class="large-alert warning-alert">
+                    <span>🟡</span>
+
+                    <div>
+                        <b>Low Battery</b>
+                        <p>Bruno's tracking device battery is at 65%.</p>
+                        <small>10:15 AM</small>
+                    </div>
+                </div>
+
+
+                <div class="large-alert safe-alert">
+                    <span>🟢</span>
+
+                    <div>
+                        <b>Device Connected</b>
+                        <p>GPS device connected successfully.</p>
+                        <small>09:50 AM</small>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- HISTORY -->
+        <section id="history" class="page hidden">
+
+            <div class="card">
+
+                <h3>📊 Tracking History</h3>
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Device</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>10:30 AM</td>
+                            <td>Rahul</td>
+                            <td>Bengaluru</td>
+                            <td class="green">Safe</td>
+                        </tr>
+
+                        <tr>
+                            <td>10:15 AM</td>
+                            <td>Bruno</td>
+                            <td>Bengaluru</td>
+                            <td class="yellow">Low Battery</td>
+                        </tr>
+
+                        <tr>
+                            <td>09:50 AM</td>
+                            <td>Rahul</td>
+                            <td>Bengaluru</td>
+                            <td class="green">Safe</td>
+                        </tr>
+
+                        <tr>
+                            <td>09:20 AM</td>
+                            <td>Bruno</td>
+                            <td>Bengaluru</td>
+                            <td class="green">Safe</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
